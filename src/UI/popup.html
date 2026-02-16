@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 280px;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: white;
+    }
+
+    .header {
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #10b981;
+    }
+
+    .title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #10b981;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      font-size: 9px;
+      color: #666;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #10b981;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background-color 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    button:hover {
+      background: #059669;
+    }
+
+    button:active {
+      background: #047857;
+    }
+
+    button.secondary {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    button.secondary:hover {
+      background: #e5e7eb;
+    }
+
+    .task-info {
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    .task-info.show {
+      display: block;
+    }
+
+    .task-info-title {
+      font-size: 11px;
+      color: #92400e;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .task-info-content {
+      font-size: 13px;
+      color: #78350f;
+      line-height: 1.4;
+    }
+
+    .task-info-target {
+      font-size: 12px;
+      color: #92400e;
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    /* Modal overlay */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      max-width: 320px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #10b981;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #10b981;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+
+    .modal-close:hover {
+      background: #f3f4f6;
+    }
+
+    .hotkey-section {
+      margin-bottom: 16px;
+    }
+
+    .hotkey-section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+
+    .hotkey-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .hotkey-item:last-child {
+      border-bottom: none;
+    }
+
+    .hotkey-description {
+      font-size: 13px;
+      color: #6b7280;
+    }
+
+    .hotkey-keys {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .key {
+      background: #f3f4f6;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #374151;
+      font-family: monospace;
+    }
+
+    .key.plus {
+      background: none;
+      border: none;
+      padding: 4px 2px;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+<div class="header">
+  <div class="title">TabTab Go 1.2.1</div>
+  <div class="subtitle">Guirao C., Berengueres J. & Kuanysheva B. (2026). TabTab Go (v1.2.0) [Computer software]. Nazarbayev University. https://github.com/orioli/tabtabgo</div>
+</div>
+
+<!-- Session Controls -->
+<div id="session-setup" class="session-section">
+  <div style="margin-bottom: 12px;">
+    <label style="display: block; font-size: 12px; color: #374151; margin-bottom: 4px; font-weight: 500;">Participant ID</label>
+    <input type="text" id="participant-id-input" placeholder="ex: 1" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px;">
+  </div>
+
+
+  <div style="margin-bottom: 12px;">
+    <label style="display: block; font-size: 12px; color: #374151; margin-bottom: 4px; font-weight: 500;">Session ID</label>
+    <input type="text" id="session-id-input" placeholder="ex: 1" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px;">
+  </div>
+
+  <div style="margin-bottom: 12px;">
+    <label style="display: block; font-size: 12px; color: #374151; margin-bottom: 4px; font-weight: 500;">Mode</label>
+    <select id="mode-select" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px; background: white; cursor: pointer;">
+      <option value="trackpad">Trackpad</option>
+      <option value="tabtabgo">TabTabGo</option>
+    </select>
+  </div>
+
+  <button id="start-session-btn">
+    <span>▶️</span>
+    <span>Start Session</span>
+  </button>
+</div>
+
+<!-- Active Session Info -->
+<div id="session-active" class="session-section" style="display: none;">
+  <div style="background: #f0fdf4; padding: 12px; border-radius: 6px; margin-bottom: 12px; border: 1px solid #10b981;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <span style="font-size: 12px; color: #065f46; font-weight: 600;">🔴 Session Active</span>
+      <span id="session-duration" style="font-size: 13px; font-weight: 700; color: #10b981;">00:00</span>
+    </div>
+    <div style="font-size: 11px; color: #065f46;">
+      <div>User: <strong id="session-user-id"></strong></div>
+      <div>Mode: <strong id="session-mode"></strong></div>
+      <div>Interactions: <strong id="session-interactions">0</strong></div>
+    </div>
+  </div>
+
+  <!-- Current Task Info -->
+  <div id="current-task-info" class="task-info">
+    <div class="task-info-title" id="task-info-title">📋 Current Task: </div>
+    <div class="task-info-content" id="current-task-number">Task 1 of 8</div>
+    <div style="display: flex; gap: 8px; margin-top: 8px;">
+      <button id="complete-task-btn" style="flex: 1; background: #10b981; padding: 8px 12px; font-size: 12px;">
+        <span>✅</span>
+        <span>Complete</span>
+      </button>
+      <button id="skip-task-btn" style="flex: 1; background: #ef4444; padding: 8px 12px; font-size: 12px;">
+        <span>⏭️</span>
+        <span>Skip</span>
+      </button>
+    </div>
+  </div>
+
+<!--  <button id="end-session-btn" style="background: #ef4444;">-->
+<!--    <span>⏹️</span>-->
+<!--    <span>End Session</span>-->
+<!--  </button>-->
+</div>
+
+<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;">
+  <div class="button-group">
+    <button id="howto-btn" class="secondary">
+      <span>❓</span>
+      <span>How to</span>
+    </button>
+    <button id="cite-btn" class="secondary">
+      <span>📚</span>
+      <span>Cite</span>
+    </button>
+  </div>
+</div>
+
+<!-- Modal for Citation -->
+<div id="cite-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">How to Cite</div>
+      <button class="modal-close" id="cite-modal-close-btn">×</button>
+    </div>
+    <div style="font-size: 13px; line-height: 1.6; color: #374151;">
+      <p style="margin-bottom: 12px;">Guirao C., Berengueres J. & Kuanysheva B. (2026). TabTab Go (v1.2.0) [Computer software]. Nazarbayev University.</p>
+      <p style="margin-top: 12px;">
+        <a href="https://github.com/orioli/tabtabgo" target="_blank" style="color: #10b981; text-decoration: none;">https://github.com/orioli/tabtabgo</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for How to -->
+<div id="howto-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Keyboard Shortcuts</div>
+      <button class="modal-close" id="modal-close-btn">×</button>
+    </div>
+
+    <div class="hotkey-section">
+      <div class="hotkey-section-title">Navigation</div>
+      <div class="hotkey-item">
+        <span class="hotkey-description">Move forward</span>
+        <div class="hotkey-keys">
+          <span class="key">Tab</span>
+          <span class="key plus">or</span>
+          <span class="key">D</span>
+        </div>
+      </div>
+      <div class="hotkey-item">
+        <span class="hotkey-description">Move backward</span>
+        <div class="hotkey-keys">
+          <span class="key">Shift</span>
+          <span class="key plus">+</span>
+          <span class="key">Tab</span>
+          <span class="key plus">or</span>
+          <span class="key">S</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hotkey-section">
+      <div class="hotkey-section-title">Actions</div>
+      <div class="hotkey-item">
+        <span class="hotkey-description">Activate button</span>
+        <div class="hotkey-keys">
+          <span class="key">Enter</span>
+          <span class="key plus">or</span>
+          <span class="key">Space</span>
+          <span class="key plus">or</span>
+          <span class="key">W</span>
+        </div>
+      </div>
+      <div class="hotkey-item">
+        <span class="hotkey-description">Close navigation</span>
+        <div class="hotkey-keys">
+          <span class="key">ESC</span>
+          <span class="key plus">or</span>
+          <span class="key">A</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../popup.js"></script>
+</body>
+</html>
